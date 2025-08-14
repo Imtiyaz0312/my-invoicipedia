@@ -14,11 +14,8 @@ import React from "react";
 import PaymentUpdater from "@/components/PaymentUpdater";
 
 interface InvoicePageProps {
-    params: { invoiceId: string };
-    searchParams: {
-        status: string;
-        sessionId: string;
-    };
+    params: Promise<{ invoiceId: string }>;
+    searchParams: Promise<{ sessionId?: string; status?: string }>;
 }
 
 // const stripe = new Stripe(String(process.env.STRIPE_API_SECRET))
@@ -53,8 +50,8 @@ export default async function Invoice({ params, searchParams }: InvoicePageProps
             isError = true
         }
     }
-    
-    
+
+
     const [result] = await db.select({
         id: Invoices.id,
         status: Invoices.status,
@@ -63,35 +60,35 @@ export default async function Invoice({ params, searchParams }: InvoicePageProps
         value: Invoices.value,
         name: Customers.name,
     })
-    .from(Invoices)
-    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
-    .where(eq(Invoices.id, invoiceId))
-    .limit(1)
-    
-    
-    
+        .from(Invoices)
+        .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+        .where(eq(Invoices.id, invoiceId))
+        .limit(1)
+
+
+
     if (!result)
         notFound();
-    
+
     const invoice = {
         ...result,
         customer: {
             name: result.name
         }
     }
-    
+
     return (
         <main className="h-full">
             <Container>
-            {
+                {
                     isSuccess && !isError && (
-                    <PaymentUpdater
-                        invoiceId={invoiceId}
-                        sessionId={sessionId}
-                        status={status}
-                    />
-                )
-            }
+                        <PaymentUpdater
+                            invoiceId={invoiceId}
+                            sessionId={sessionId}
+                            status={status}
+                        />
+                    )
+                }
                 {isError && (
                     <p className="bg-red-100 text-sm text-red-800 px-3 py-2 rounded-lg mb-6 text-center mx-4">
                         Something Went Wrong, Please Try Again!
