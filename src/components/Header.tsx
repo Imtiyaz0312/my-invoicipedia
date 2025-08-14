@@ -2,7 +2,6 @@ import {
   ClerkProvider,
   OrganizationSwitcher,
   SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton,

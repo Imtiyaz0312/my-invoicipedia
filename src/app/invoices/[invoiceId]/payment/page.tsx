@@ -8,20 +8,20 @@ import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Check, CreditCard, DollarSign, X } from "lucide-react";
-import createPayment from "@/app/actions";
-import Stripe from "stripe";
+import createPayment, { verifyPayment } from "@/app/actions";
+// import Stripe from "stripe";
 import React from "react";
 import PaymentUpdater from "@/components/PaymentUpdater";
 
 interface InvoicePageProps {
-    params: { invoiceId: string },
+    params: { invoiceId: string };
     searchParams: {
         status: string;
         sessionId: string;
-    }
+    };
 }
 
-const stripe = new Stripe(String(process.env.STRIPE_API_SECRET))
+// const stripe = new Stripe(String(process.env.STRIPE_API_SECRET))
 
 
 export default async function Invoice({ params, searchParams }: InvoicePageProps) {
@@ -47,6 +47,12 @@ export default async function Invoice({ params, searchParams }: InvoicePageProps
     //     }
 
     // }
+    if (isSuccess) {
+        const paid = await verifyPayment(sessionId);
+        if (!paid) {
+            isError = true
+        }
+    }
     
     
     const [result] = await db.select({
@@ -78,7 +84,7 @@ export default async function Invoice({ params, searchParams }: InvoicePageProps
         <main className="h-full">
             <Container>
             {
-                isSuccess && (
+                    isSuccess && !isError && (
                     <PaymentUpdater
                         invoiceId={invoiceId}
                         sessionId={sessionId}

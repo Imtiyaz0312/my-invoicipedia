@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 interface ContainerProps extends React.ComponentProps<"div"> {
-
+  children?: React.ReactNode;
 }
 
 

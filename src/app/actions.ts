@@ -4,16 +4,16 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { Customers, Invoices, Status } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe"
 import { headers } from "next/headers";
-import { Resend } from 'resend';
+// import { Resend } from 'resend';
 // import InvoiceCreatedEmail from "@/emails/invoice-create";
 
 
 const stripe = new Stripe(String(process.env.STRIPE_API_SECRET))
-const resend = new Resend(process.env.RESEND_API_KEY)
+// const resend = new Resend(process.env.RESEND_API_KEY)
 
 
 export async function createAction(formData: FormData) {
@@ -165,4 +165,10 @@ export default async function createPayment(formData: FormData) {
         throw new Error('Invalid Session')
     }
     redirect(session.url)
+}
+
+//Verify's if the payment is paid from sessionId
+export async function verifyPayment(sessionId: string) {
+    const { payment_status } = await stripe.checkout.sessions.retrieve(sessionId);
+    return payment_status === "paid";
 }
